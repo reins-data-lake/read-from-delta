@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReadFromDeltaLake {
 
         private static String warehouseDir = "hdfs://10.0.0.203:9000/delta/warehouse";
-        private static String tableName = "taxi_log_1";
+        private static String tableName = "taxi_version_1";
 
         public static void main(String[] args) {
                 SparkSession spark = SparkSession.builder()
@@ -39,7 +39,7 @@ public class ReadFromDeltaLake {
                 spark.sparkContext().setLogLevel("WARN");
 
                 Dataset<Row> df = spark.read().format("delta").table(tableName);
-                df.show(50);
+                df.show();
                 Long count = spark.read().format("delta").table(tableName).count();
                 log.warn("query count:{}", count);
 
@@ -49,7 +49,9 @@ public class ReadFromDeltaLake {
                 spark.sql("use default");
                 spark.sql("show tables").show();
 
-                spark.sql("select * from taxi_log_1").show();
+                String sql = String.format("select * from %s", tableName);
+                spark.sql(sql).show();
+                log.warn("count:{}", spark.sql(sql).count());
 
                 spark.catalog().listDatabases().show();
                 spark.catalog().listTables().show();
